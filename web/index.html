@@ -1,1 +1,95 @@
-where the web files will be stored
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradCap Controller</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <h1>GradCap Controller</h1>
+    </header>
+
+    <main>
+
+        <!-- Display Status -->
+        <section>
+            <h2>Display Status</h2>
+            <p>Current Mode: <span id="current-mode">Blank</span></p>
+            <p>Current Content: <span id="current-content">None</span></p>
+        </section>
+
+        <!-- Custom Text -->
+        <section>
+            <h2>Custom Text</h2>
+
+            <label for="text-input">Text to Display</label>
+            <input
+                type="text"
+                id="text-input"
+                placeholder="Enter scrolling text..."
+            >
+
+            <label for="text-color">Text Color</label>
+            <div class="color-picker">
+                <input
+                    type="color"
+                    id="text-color"
+                    value="#ffffff"
+                >
+                <span id="text-color-value">#FFFFFF</span>
+            </div>
+
+            <button id="send-text">Display Text</button>
+        </section>
+
+        <!-- Brightness -->
+        <section>
+            <h2>Brightness</h2>
+
+            <label for="brightness">Brightness</label>
+            <input
+                type="range"
+                id="brightness"
+                min="0"
+                max="100"
+                value="75"
+            >
+
+            <span id="brightness-value">75%</span>
+        </section>
+
+        <!-- Animations -->
+        <section>
+            <h2>Animations</h2>
+
+            <label for="animation-select">Select Animation</label>
+            <select id="animation-select">
+                <option value="animation-1">Animation 1</option>
+                <option value="animation-2">Animation 2</option>
+                <option value="animation-3">Animation 3</option>
+            </select>
+
+            <button id="start-animation">Start Animation</button>
+        </section>
+
+        <!-- Clear Display -->
+        <section>
+            <h2>Display Controls</h2>
+            <button id="clear-display" class="danger">
+                Clear Display
+            </button>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>GradCap LED Controller</p>
+    </footer>
+
+</body>
+</html>
