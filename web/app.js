@@ -26,7 +26,7 @@ const displayState = {
     text: null,
     textColor: "#ffffff",
     animation: null,
-    brightness: 0.75
+    brightness: 0.25
 };
 
 // ============================================================================
