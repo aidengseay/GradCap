@@ -63,7 +63,7 @@ class MatrixController:
 
         self.display = framebufferio.FramebufferDisplay(
             self.matrix,
-            auto_refresh=True,
+            auto_refresh=False,
         )
 
         # Set the default LED matrix state
@@ -130,6 +130,8 @@ class MatrixController:
 
         self._stop_media()
 
+        self.display.refresh()
+
     def _stop_media(self):
 
         self._clear_group()
@@ -184,6 +186,8 @@ class MatrixController:
         self.group.append(self.text_label)
         self.last_scroll = time.monotonic()
 
+        self.display.refresh()
+
     def _update_text(self):
         
         # Move the text left by one pixel when due
@@ -213,6 +217,8 @@ class MatrixController:
             HEIGHT // 2,
         )
 
+        self.display.refresh()
+
     # -----------------------------
     # Brightness
     # -----------------------------
@@ -227,6 +233,8 @@ class MatrixController:
             self.text_label.color = self._apply_brightness(
                 self.text_color
             )
+
+            self.display.refresh()
 
     # -----------------------------
     # Animations
@@ -276,6 +284,7 @@ class MatrixController:
 
         self.animation = animation
         self.mode = "animation"
+        self.display.refresh()
 
     def _update_animation(self):
 
@@ -289,9 +298,16 @@ class MatrixController:
 
         start = time.monotonic()
 
+        # Clear old frame
         self.gif.bitmap.fill(0)
+
+        # Decode new frame
         delay = self.gif.next_frame()
 
+        # Display completed frame
+        self.display.refresh()
+
+        # Schedule next frame
         self.next_frame_time = start + delay
 
     # -----------------------------

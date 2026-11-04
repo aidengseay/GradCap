@@ -116,7 +116,7 @@ def create_server(controller):
     http_server = Server(
         pool,
         root_path=WEB_ROOT,
-        debug=True,
+        debug=False,
     )
 
     # ---------------------------------
