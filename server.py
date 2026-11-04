@@ -24,11 +24,10 @@ PASSWORD = os.getenv("GRADCAP_AP_PASSWORD")
 PORT = 5000
 WEB_ROOT = "/web"
 
-ANIMATIONS = (
-    "animation-1",
-    "animation-2",
-    "animation-3",
-)
+ANIMATIONS = {
+    "pong-test": "pong-test.gif",
+    "cat-space": "cat-space.gif",
+}
 
 # ==============================================================================
 # Server Helper Functions
@@ -251,7 +250,7 @@ def create_server(controller):
             )
 
         # Start a pre-made animation
-        controller.set_animation(animation)
+        controller.set_animation(ANIMATIONS[animation])
 
         return JSONResponse(
             request,

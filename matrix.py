@@ -8,42 +8,17 @@ import displayio
 import framebufferio
 import rgbmatrix
 import terminalio
+import gifio
+import gc
 
 from adafruit_display_text import label
 
 # ==============================================================================
 # Matrix Constants
 # ==============================================================================
-def _update_text(self):
-        
-        # Move the text left by one pixel when due
-
-        if self.text_label is None:
-            return
-
-        now = time.monotonic()
-
-        if now - self.last_scroll < SCROLL_INTERVAL:
-            return
-
-        self.last_scroll = now
-
-        # Move text one pixel left
-        self.scroll_x -= 1
-
-        # Get total text width
-        text_width = self.text_label.bounding_box[2]
-
-        # Restart once text has left the screen
-        if self.scroll_x < -text_width:
-            self.scroll_x = WIDTH
-
-        self.text_label.anchored_position = (
-            self.scroll_x,
-            HEIGHT // 2,
-        )
 
 SCROLL_INTERVAL = 0.04  # Seconds per pixel
+ASSETS_ROOT = "/assets"
 WIDTH = 32
 HEIGHT = 32
 
@@ -102,6 +77,10 @@ class MatrixController:
         self.text_color = 0xFFFFFF
         self.text_label = None
 
+        self.image = None
+        self.gif = None
+        self.next_frame_time = 0
+
         self.brightness = 0.25
 
         self.animation = None
@@ -149,7 +128,21 @@ class MatrixController:
         self.text = None
         self.animation = None
 
+        self._stop_media()
+
+    def _stop_media(self):
+
         self._clear_group()
+
+        if self.gif is not None:
+            self.gif.deinit()
+            self.gif = None
+
+        self.image = None
+        self.animation = None
+        self.next_frame_time = 0
+
+        gc.collect()
 
     # -----------------------------
     # Scrolling text
@@ -159,7 +152,7 @@ class MatrixController:
         
         # Start displaying scrolling text
 
-        self._clear_group()
+        self._stop_media()
 
         self.mode = "text"
 
@@ -235,23 +228,71 @@ class MatrixController:
                 self.text_color
             )
 
-        elif self.mode == "animation":
-            # TODO: implement the animation brightness functionality
-            print("[MATRIX] Animation brightness not implemented")
-
     # -----------------------------
     # Animations
     # -----------------------------
 
     def set_animation(self, animation):
-        
-        # Start a preset animation
 
-        self._clear_group()
-        self.mode = "animation"
+        path = ASSETS_ROOT + "/" + animation
+
+        # Release any previous display resources
+        self._stop_media()
+
+        self.mode = "blank"
         self.text = None
 
-        #TODO: implement this function
+        if animation.endswith(".bmp"):
+
+            self.image = displayio.OnDiskBitmap(path)
+
+            tile = displayio.TileGrid(
+                self.image,
+                pixel_shader=self.image.pixel_shader,
+            )
+
+            self.group.append(tile)
+
+        elif animation.endswith(".gif"):
+
+            self.gif = gifio.OnDiskGif(path)
+
+            tile = displayio.TileGrid(
+                self.gif.bitmap,
+                pixel_shader=displayio.ColorConverter(
+                    input_colorspace=displayio.Colorspace.RGB565_SWAPPED
+                ),
+            )
+
+            self.group.append(tile)
+
+            # Load first frame and record its display delay
+            delay = self.gif.next_frame()
+
+            self.next_frame_time = time.monotonic() + delay
+
+        else:
+            raise ValueError("Unsupported image format")
+
+        self.animation = animation
+        self.mode = "animation"
+
+    def _update_animation(self):
+
+        if self.gif is None:
+            return
+
+        now = time.monotonic()
+
+        if now < self.next_frame_time:
+            return
+
+        start = time.monotonic()
+
+        self.gif.bitmap.fill(0)
+        delay = self.gif.next_frame()
+
+        self.next_frame_time = start + delay
 
     # -----------------------------
     # Main update function
@@ -265,5 +306,4 @@ class MatrixController:
             self._update_text()
 
         elif self.mode == "animation":
-            #TODO: implement this if statement
-            ...
+            self._update_animation()
