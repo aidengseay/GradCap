@@ -14,6 +14,34 @@ from adafruit_display_text import label
 # ==============================================================================
 # Matrix Constants
 # ==============================================================================
+def _update_text(self):
+        
+        # Move the text left by one pixel when due
+
+        if self.text_label is None:
+            return
+
+        now = time.monotonic()
+
+        if now - self.last_scroll < SCROLL_INTERVAL:
+            return
+
+        self.last_scroll = now
+
+        # Move text one pixel left
+        self.scroll_x -= 1
+
+        # Get total text width
+        text_width = self.text_label.bounding_box[2]
+
+        # Restart once text has left the screen
+        if self.scroll_x < -text_width:
+            self.scroll_x = WIDTH
+
+        self.text_label.anchored_position = (
+            self.scroll_x,
+            HEIGHT // 2,
+        )
 
 SCROLL_INTERVAL = 0.04  # Seconds per pixel
 WIDTH = 32
@@ -200,15 +228,16 @@ class MatrixController:
         
         # Update brightness without restarting text
 
-        self.brightness = max(
-            0.0,
-            min(1.0, brightness),
-        )
+        self.brightness = max(0.0, min(1.0, brightness))
 
-        if self.text_label is not None:
+        if self.mode == "text" and self.text_label is not None:
             self.text_label.color = self._apply_brightness(
                 self.text_color
             )
+
+        elif self.mode == "animation":
+            # TODO: implement the animation brightness functionality
+            print("[MATRIX] Animation brightness not implemented")
 
     # -----------------------------
     # Animations
@@ -216,15 +245,13 @@ class MatrixController:
 
     def set_animation(self, animation):
         
-        # Select an animation mode 
+        # Start a preset animation
 
         self._clear_group()
-
         self.mode = "animation"
-        self.animation = animation
         self.text = None
 
-        # TODO: Render animation frames
+        #TODO: implement this function
 
     # -----------------------------
     # Main update function
@@ -238,5 +265,5 @@ class MatrixController:
             self._update_text()
 
         elif self.mode == "animation":
-            # TODO: Update animation frames
-            pass
+            #TODO: implement this if statement
+            ...
